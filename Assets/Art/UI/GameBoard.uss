@@ -18,6 +18,37 @@
 
 .network-field {
     margin-bottom: 8px;
+}
+
+.network-field .unity-base-field__label {
+    color: #a8b2d1;
+    min-width: 52px;
+}
+
+.network-field .unity-base-text-field__input {
+    background-color: #0f3460;
+    color: #eaeaea;
+    border-width: 1px;
+    border-color: #1b998b;
+    border-radius: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.network-field .unity-text-input {
+    background-color: #0f3460;
+    color: #eaeaea;
+    border-width: 1px;
+    border-color: #1b998b;
+    border-radius: 4px;
+}
+
+.network-field .unity-text-element {
+    color: #eaeaea;
+}
+
+.network-field .unity-text-input__input {
+    background-color: #0f3460;
     color: #eaeaea;
 }
 
@@ -39,6 +70,16 @@
 .network-btn--join {
     margin-right: 0;
     background-color: #1b998b;
+}
+
+.network-btn:disabled {
+    background-color: #3d3d5c;
+    color: #888899;
+}
+
+.network-btn--join:enabled {
+    background-color: #1b998b;
+    color: #ffffff;
 }
 
 .connection-label {

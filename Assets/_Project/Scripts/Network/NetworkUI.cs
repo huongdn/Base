@@ -12,6 +12,9 @@ public class NetworkUI : MonoBehaviour
     private Button _joinBtn;
     private Label _connectionLabel;
 
+    private bool _joinAfterConnect;
+    private string _pendingRoomId;
+
     private void Awake()
     {
         _client = GetComponent<NetworkClient>();
@@ -19,6 +22,7 @@ public class NetworkUI : MonoBehaviour
 
     private void OnEnable()
     {
+        _client.OnConnected += HandleConnected;
         _client.OnStateChanged += HandleStateChanged;
         _client.OnRoomJoined += HandleRoomJoined;
         _client.OnServerError += HandleServerError;
@@ -27,6 +31,7 @@ public class NetworkUI : MonoBehaviour
 
     private void OnDisable()
     {
+        _client.OnConnected -= HandleConnected;
         _client.OnStateChanged -= HandleStateChanged;
         _client.OnRoomJoined -= HandleRoomJoined;
         _client.OnServerError -= HandleServerError;
@@ -44,6 +49,8 @@ public class NetworkUI : MonoBehaviour
         _connectionLabel = root.Q<Label>("connection-label");
 
         _serverUrlField.value = _client.ServerUrl;
+        ApplyTextFieldColors(_serverUrlField);
+        ApplyTextFieldColors(_roomIdField);
 
         _connectBtn.clicked += OnConnectClicked;
         _joinBtn.clicked += OnJoinClicked;
@@ -56,20 +63,44 @@ public class NetworkUI : MonoBehaviour
     {
         if (_client.State == NetworkConnectionState.Disconnected)
         {
+            _joinAfterConnect = false;
+            _pendingRoomId = null;
             _client.SetServerUrl(_serverUrlField.value.Trim());
             _client.Connect();
             return;
         }
 
+        _joinAfterConnect = false;
+        _pendingRoomId = null;
         _client.Disconnect();
     }
 
     private void OnJoinClicked()
     {
-        if (_client.State != NetworkConnectionState.Connected) return;
+        if (_client.State == NetworkConnectionState.Connecting) return;
 
-        var roomId = _roomIdField.value.Trim();
-        _client.JoinRoom(string.IsNullOrEmpty(roomId) ? null : roomId.ToUpperInvariant());
+        var roomId = NormalizeRoomId(_roomIdField.value);
+
+        if (_client.State == NetworkConnectionState.Disconnected)
+        {
+            _joinAfterConnect = true;
+            _pendingRoomId = roomId;
+            _client.SetServerUrl(_serverUrlField.value.Trim());
+            _client.Connect();
+            _connectionLabel.text = "Connecting, then joining room...";
+            return;
+        }
+
+        _client.JoinRoom(roomId);
+    }
+
+    private void HandleConnected()
+    {
+        if (!_joinAfterConnect) return;
+
+        _joinAfterConnect = false;
+        _client.JoinRoom(_pendingRoomId);
+        _pendingRoomId = null;
     }
 
     private void HandleStateChanged(NetworkConnectionState state)
@@ -92,17 +123,21 @@ public class NetworkUI : MonoBehaviour
 
     private void HandleDisconnected(string reason)
     {
+        _joinAfterConnect = false;
+        _pendingRoomId = null;
         _connectionLabel.text = string.IsNullOrEmpty(reason) ? "Disconnected" : $"Disconnected — {reason}";
         UpdateButtons(NetworkConnectionState.Disconnected);
     }
 
     private void UpdateConnectionLabel(NetworkConnectionState state)
     {
+        if (_joinAfterConnect && state == NetworkConnectionState.Connecting) return;
+
         _connectionLabel.text = state switch
         {
             NetworkConnectionState.Connecting => "Connecting...",
             NetworkConnectionState.Connected => "Connected — join or create a room",
-            _ => "Disconnected"
+            _ => "Disconnected — Connect, or enter a room code and Join"
         };
     }
 
@@ -113,7 +148,30 @@ public class NetworkUI : MonoBehaviour
 
         _connectBtn.text = connected ? "Disconnect" : "Connect";
         _connectBtn.SetEnabled(!busy);
-        _joinBtn.SetEnabled(connected);
-        _serverUrlField.SetEnabled(state == NetworkConnectionState.Disconnected);
+        _joinBtn.SetEnabled(!busy);
+        _serverUrlField.SetEnabled(!connected && !busy);
+        _roomIdField.SetEnabled(!busy);
+    }
+
+    private static string NormalizeRoomId(string raw)
+    {
+        var trimmed = raw.Trim();
+        return string.IsNullOrEmpty(trimmed) ? null : trimmed.ToUpperInvariant();
+    }
+
+    private static void ApplyTextFieldColors(TextField field)
+    {
+        field.style.color = new Color(0.92f, 0.92f, 0.92f);
+
+        var textInput = field.Q(className: "unity-text-input");
+        if (textInput != null)
+        {
+            textInput.style.backgroundColor = new Color(0.06f, 0.2f, 0.37f);
+            textInput.style.color = new Color(0.92f, 0.92f, 0.92f);
+        }
+
+        var textElement = field.Q(className: "unity-text-element");
+        if (textElement != null)
+            textElement.style.color = new Color(0.92f, 0.92f, 0.92f);
     }
 }
