@@ -46,7 +46,6 @@ public class GameUI : MonoBehaviour
 
     private void UpdateUI()
     {
-        // Update cells
         for (int i = 0; i < 9; i++)
         {
             _cells[i].text = _state.Board[i] switch
@@ -55,15 +54,31 @@ public class GameUI : MonoBehaviour
                 Player.O => "O",
                 _ => ""
             };
+
+            // Reset classes trước
+            _cells[i].RemoveFromClassList("cell--winner");
+            _cells[i].RemoveFromClassList("cell--draw");
             _cells[i].SetEnabled(!_state.IsGameOver && _state.Board[i] == Player.None);
         }
 
-        // Update status label
+        // Highlight winning cells
         if (_state.Winner != Player.None)
+        {
+            foreach (var idx in _state.WinningCells)
+                _cells[idx].AddToClassList("cell--winner");
+
             _statusLabel.text = $"Player {_state.Winner} Wins! 🎉";
+        }
         else if (_state.IsDraw)
+        {
+            for (int i = 0; i < 9; i++)
+                _cells[i].AddToClassList("cell--draw");
+
             _statusLabel.text = "It's a Draw!";
+        }
         else
+        {
             _statusLabel.text = $"Player {_state.CurrentPlayer}'s Turn";
+        }
     }
 }

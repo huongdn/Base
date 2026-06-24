@@ -19,8 +19,8 @@ public class GameLogic
 
         state.SetCell(cellIndex, state.CurrentPlayer);
 
-        if (CheckWinner(state.Board, state.CurrentPlayer))
-            state.SetWinner(state.CurrentPlayer);
+        if (CheckWinner(state.Board, state.CurrentPlayer, out int[] winningCells))
+            state.SetWinner(state.CurrentPlayer, winningCells);
         else if (CheckDraw(state.Board))
             state.SetDraw();
         else
@@ -44,5 +44,21 @@ public class GameLogic
         foreach (var cell in board)
             if (cell == Player.None) return false;
         return true;
+    }
+
+    private bool CheckWinner(Player[] board, Player player, out int[] winningCells)
+    {
+        foreach (var condition in WinConditions)
+        {
+            if (board[condition[0]] == player &&
+                board[condition[1]] == player &&
+                board[condition[2]] == player)
+            {
+                winningCells = condition;
+                return true;
+            }
+        }
+        winningCells = new int[0];
+        return false;
     }
 }

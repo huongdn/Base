@@ -7,7 +7,13 @@ public class GameState
     public Player Winner { get; private set; } = Player.None;
     public bool IsDraw { get; private set; } = false;
     public bool IsGameOver => Winner != Player.None || IsDraw;
+    public int[] WinningCells { get; private set; } = new int[0];
 
+    public void SetWinner(Player player, int[] winningCells)
+    {
+        Winner = player;
+        WinningCells = winningCells;
+    }
     public void Reset()
     {
         Board = new Player[9];

@@ -44,3 +44,14 @@
     border-width: 0;
     border-radius: 6px;
 }
+
+.cell--winner {
+    background-color: #e94560;
+    color: white;
+    border-color: #ff6b6b;
+}
+
+.cell--draw {
+    background-color: #4a4a6a;
+    color: #aaaaaa;
+}
