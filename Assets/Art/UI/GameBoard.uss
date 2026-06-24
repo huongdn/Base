@@ -5,6 +5,47 @@
     background-color: #1a1a2e;
 }
 
+.network-bar {
+    width: 100%;
+    max-width: 520px;
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    background-color: #16213e;
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: #0f3460;
+}
+
+.network-field {
+    margin-bottom: 8px;
+    color: #eaeaea;
+}
+
+.network-actions {
+    flex-direction: row;
+    margin-bottom: 8px;
+}
+
+.network-btn {
+    flex-grow: 1;
+    margin-right: 8px;
+    padding: 8px 12px;
+    background-color: #0f3460;
+    color: #eaeaea;
+    border-width: 0;
+    border-radius: 6px;
+}
+
+.network-btn--join {
+    margin-right: 0;
+    background-color: #1b998b;
+}
+
+.connection-label {
+    font-size: 14px;
+    color: #a8b2d1;
+}
+
 .status {
     font-size: 24px;
     color: #eaeaea;

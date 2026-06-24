@@ -64,7 +64,8 @@
 - [x] **3.2** Server: room manager + game session lifecycle
   - `server/src/core/`, `server/src/games/tictactoe/`, protocol-compliant WebSocket handlers
 
-- [ ] **3.3** Unity: WebSocket network client, connection handling
+- [x] **3.3** Unity: WebSocket network client, connection handling
+  - `NetworkClient.cs`, `MessageSerializer.cs`, `NetworkUI.cs`, scene + UXML wired
 
 - [ ] **3.4** State synchronization — server as source of truth in `GameUI`
 

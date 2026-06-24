@@ -2,6 +2,15 @@
         xmlns:uie="UnityEditor.UIElements">
     <Style src="GameBoard.uss"/>
     <ui:VisualElement name="root" class="root">
+        <ui:VisualElement name="network-bar" class="network-bar">
+            <ui:TextField name="server-url" label="Server" value="ws://localhost:3000" class="network-field"/>
+            <ui:TextField name="room-id" label="Room" class="network-field"/>
+            <ui:VisualElement class="network-actions">
+                <ui:Button name="connect-btn" text="Connect" class="network-btn"/>
+                <ui:Button name="join-btn" text="Join Room" class="network-btn network-btn--join"/>
+            </ui:VisualElement>
+            <ui:Label name="connection-label" text="Disconnected" class="connection-label"/>
+        </ui:VisualElement>
         <ui:Label name="status-label" text="Player X's Turn" class="status"/>
         <ui:VisualElement name="board" class="board">
             <ui:VisualElement class="row">

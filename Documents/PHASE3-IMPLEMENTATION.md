@@ -14,7 +14,7 @@ Phase 3 connects the Unity client to a real WebSocket server. The server owns al
 |------|-------------|--------|
 | 3.1 | Message protocol (JSON schema + shared types) | Done |
 | 3.2 | Server room manager + game session | Done |
-| 3.3 | Unity WebSocket client | Pending |
+| 3.3 | Unity WebSocket client | Done |
 | 3.4 | Client state sync (server as source of truth) | Pending |
 | 3.5 | Disconnect / reconnect edge cases | Pending |
 
@@ -174,12 +174,50 @@ Verified flow: two clients join → moves alternate → `game_over` with correct
 
 ---
 
+## 3.3 — Unity WebSocket Client
+
+### Goal
+
+Connect the Unity client to the server over WebSocket, send protocol messages, and surface connection lifecycle events. The board still runs locally in `GameUI` until step 3.4.
+
+### Deliverables
+
+| File | Purpose |
+|------|---------|
+| `Assets/_Project/Scripts/Network/NetworkClient.cs` | `ClientWebSocket` wrapper — connect, disconnect, send, receive |
+| `Assets/_Project/Scripts/Network/MessageSerializer.cs` | JSON serialize/deserialize using protocol DTOs |
+| `Assets/_Project/Scripts/Network/NetworkUI.cs` | Connection bar UI — server URL, connect, join room |
+| `Assets/Art/UI/GameBoard.uxml` | Network bar added above the game board |
+| `Assets/Art/UI/GameBoard.uss` | Styles for network bar |
+| `Assets/Scenes/GameScene.unity` | `NetworkClient` + `NetworkUI` on `UIDocument` object |
+
+### NetworkClient API
+
+| Member | Description |
+|--------|-------------|
+| `Connect()` / `Disconnect()` | Open/close WebSocket to `serverUrl` |
+| `JoinRoom(roomId?)` | Send `join_room` (omit id to create) |
+| `MakeMove(cellIndex)` | Send `make_move` (used in 3.4) |
+| `RejoinRoom(roomId, token)` | Send `rejoin_room` (used in 3.5) |
+| `OnConnected`, `OnDisconnected` | Connection lifecycle |
+| `OnRoomJoined`, `OnGameState`, `OnGameOver`, `OnPlayerLeft`, `OnServerError` | Server message events |
+| `RoomId`, `SessionToken`, `YourPlayer` | Session info from `room_joined` |
+
+Receive loop runs on a background thread; events are dispatched on Unity's main thread via `Update`.
+
+### How to test in Unity
+
+1. Start server: `cd server && npm run dev`
+2. Open `GameScene` in Unity, press Play
+3. Click **Connect** (default `ws://localhost:3000`)
+4. Click **Join Room** with empty room field → creates room, shows room code + your symbol
+5. Second client (build or ParrelSync): Connect → enter room code → **Join Room**
+
+Board moves are still local-only until **3.4**.
+
+---
+
 ## What is not done yet
-
-### 3.3 — Unity WebSocket client
-
-- No `NetworkClient` script yet under `Assets/_Project/Scripts/Network/`.
-- Unity still plays **local-only** via `GameUI.cs` + `GameLogic`.
 
 ### 3.4 — State synchronization
 
@@ -188,8 +226,8 @@ Verified flow: two clients join → moves alternate → `game_over` with correct
 
 ### 3.5 — Edge cases
 
-- `rejoin_room` is implemented on the server but not wired in Unity.
-- Disconnect UX (show "opponent left", offer rejoin) is not built on the client.
+- `rejoin_room` is implemented on the server and exposed on `NetworkClient`, but disconnect UX is not built in the UI.
+- `NetworkUI` does not yet show opponent-left or rejoin prompts.
 
 ---
 
@@ -209,3 +247,4 @@ Verified flow: two clients join → moves alternate → `game_over` with correct
 |------|------|---------|
 | 2026-06-24 | 3.1 | Protocol spec, JSON schema, TS types + parser, Unity DTOs |
 | 2026-06-24 | 3.2 | TicTacToe game logic, room manager, WebSocket handlers, integration tested |
+| 2026-06-24 | 3.3 | Unity NetworkClient, MessageSerializer, NetworkUI, connection bar in GameBoard |
