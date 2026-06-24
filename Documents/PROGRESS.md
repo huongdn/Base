@@ -56,7 +56,19 @@
 
 ## Phase 3 — Multiplayer
 
-> In Progress
+> In Progress — see [PHASE3-IMPLEMENTATION.md](PHASE3-IMPLEMENTATION.md) for full details
+
+- [x] **3.1** Design communication protocol (JSON schema)
+  - [PROTOCOL.md](PROTOCOL.md), `server/src/protocol/`, Unity `Network/Protocol/` DTOs
+
+- [x] **3.2** Server: room manager + game session lifecycle
+  - `server/src/core/`, `server/src/games/tictactoe/`, protocol-compliant WebSocket handlers
+
+- [ ] **3.3** Unity: WebSocket network client, connection handling
+
+- [ ] **3.4** State synchronization — server as source of truth in `GameUI`
+
+- [ ] **3.5** Edge cases: disconnect, reconnect (`rejoin_room`)
 
 ---
 
