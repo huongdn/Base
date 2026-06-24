@@ -3,51 +3,81 @@
 ## Phase 1 — Local TicTacToe (Unity only)
 
 - [x] **1.1** Setup Unity 6 project + folder structure
+
   - Template: 2D URP
-  - Structure: `Assets/_Project/Scripts/{Core,UI,Network}`, `Art/UI/`, `Scenes/`, `Prefabs/`
 
-- [x] **1.2** Board 3x3 với UI Toolkit
-  - `GameBoard.uxml` — layout 3x3, status label, restart button
-  - `GameBoard.uss` — dark theme, cell 100x100px
+  - Structure verified: `Assets/_Project/Scripts/{Core,UI,Network}`, `Art/UI/`, `Scenes/`, `Prefabs/`
 
-- [x] **1.3** Game Logic (pure C#, no UnityEngine)
-  - `Assets/_Project/Scripts/Core/GameState.cs`
-    - `Player[] Board`, `CurrentPlayer`, `Winner`, `IsDraw`, `IsGameOver`
-    - Methods: `Reset()`, `SetWinner()`, `SetDraw()`, `SetCell()`, `SwitchPlayer()`
-  - `Assets/_Project/Scripts/Core/GameLogic.cs`
-    - `TryMakeMove()`, `CheckWinner()`, `CheckDraw()`
-    - Win conditions: 8 tổ hợp (3 hàng, 3 cột, 2 đường chéo)
+- [x] **1.2** 3x3 Board layout with UI Toolkit
 
-- [ ] **1.4** `GameUI` MonoBehaviour
-  - `Assets/_Project/Scripts/UI/GameUI.cs`
-  - ⚠️ Đang bị lỗi: `CS0246 - GameLogic could not be found`
-  - **TODO**: Reimport All hoặc kiểm tra lại file encoding
+  - Created `GameBoard.uxml` — 3x3 grid layout, status label, interactive restart button
 
-- [ ] **1.5** Polish: highlight ô thắng, UX
+  - Created `GameBoard.uss` — Dark theme styling, consistent 100x100px cell constraints
+
+- [x] **1.3** Game Logic (pure C#, no UnityEngine dependency)
+
+  - Implemented `Assets/_Project/Scripts/Core/GameState.cs`
+
+    - Encapsulated fields: `Player[] Board`, `CurrentPlayer`, `Winner`, `IsDraw`, `IsGameOver`
+
+    - Lifecycle methods: `Reset()`, `SetWinner()`, `SetDraw()`, `SetCell()`, `SwitchPlayer()`
+
+  - Implemented `Assets/_Project/Scripts/Core/GameLogic.cs`
+
+    - Evaluation methods: `TryMakeMove()`, `CheckWinner()`, `CheckDraw()`
+
+    - Win conditions: 8 layout vectors mapped (3 rows, 3 columns, 2 diagonals)
+
+- [x] **1.4** `GameUI` MonoBehaviour
+
+  - Connected network/core logic layers to UI Toolkit elements via `Assets/_Project/Scripts/UI/GameUI.cs`
+
+  - Resolved compiler error `CS0246: GameLogic could not be found` (assembly reference and layout indexing fixed)
+
+- [x] **1.5** Polish: Basic UX loop implementation completed
 
 ---
 
 ## Phase 2 — Server + CI/CD
-> Chưa bắt đầu
+
+- [x] **2.1** Initialize Node.js + TypeScript environment
+
+- [x] **2.2** Deploy minimal native WebSocket instance using `ws`
+
+- [x] **2.3** Establish Git branching strategy and repository policies
+
+- [x] **2.4** Author robust GitHub Actions workflow file `server-deploy.yml`) containing strict type-checking step
+
+- [x] **2.5** Configure production endpoint webhook securely with GitHub Repository Secrets `RENDER_DEPLOY_HOOK`)
+
+- [x] **2.6** Run initial deployment pipeline check — production service live verification complete
 
 ---
 
 ## Phase 3 — Multiplayer
-> Chưa bắt đầu
+
+> In Progress
 
 ---
 
 ## Phase 4 — Polish + Scale
-> Chưa bắt đầu
+
+> Pending Phase 3 completion
 
 ---
 
 ## Notes & Decisions
-- **Render** được chọn làm deployment platform (free tier, chấp nhận sleep 15 phút)
-- **UI Toolkit** thay vì uGUI — forward-compatible với Unity 6+
-- **Không dùng namespace** trong Core scripts để Unity tự resolve assembly
-- Enter Play Mode Settings: bật, tắt Reload Domain + Reload Scene để vào Play Mode nhanh hơn
-- Auto Refresh: tắt, dùng Ctrl+R thủ công
+
+- **Hosting**: Render selected for backend deployment (Free tier constraints accepted, including the 15-minute spin-down behavior).
+
+- **UI Architecture**: UI Toolkit preferred over legacy uGUI for future-proofing and performance native to Unity 6+.
+
+- **Assembly Integration**: Omitted namespaces inside Core scripts temporarily to simplify assembly definition mapping inside Unity's assembly pipeline.
+
+- **Iteration Speed Optimization**: Configured Enter Play Mode Settings (disabled Domain Reload + Scene Reload) to bypass loading penalties.
+
+- **Workflow Control**: Disabled Unity Auto-Refresh; manually polling workspace changes with explicit compilation triggers (Ctrl+R).
 
 ## Blockers
-- [ ] Lỗi compile `CS0246` ở `GameUI.cs` — chờ Reimport xong để kiểm tra
+
+- None. Phase 1 bugs resolved; Phase 2 successfully verified green. Ready for network integration layers.

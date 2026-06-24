@@ -1,100 +1,155 @@
 # TicTacToe Multiplayer — Project Plan
 
 ## Stack
+
 - **Client**: Unity 6 (UI Toolkit)
+
 - **Server**: Node.js + TypeScript + `ws` (WebSocket library)
+
 - **Deploy**: Render (free tier)
+
 - **CI/CD**: GitHub Actions
-- **Repo**: Monorepo (client + server cùng 1 repo)
+
+- **Repo**: Monorepo (client + server in the same repository)
 
 ## Folder Structure
 
-```
 /
+
 ├── client/                  # Unity 6 project
+
 │   └── Assets/_Project/
+
 │       ├── Scripts/
-│       │   ├── Core/        # GameState, GameLogic — pure C#, không Unity
-│       │   ├── UI/          # MonoBehaviour, chỉ lo render
+
+│       │   ├── Core/        # GameState, GameLogic — pure C#, no Unity dependencies
+
+│       │   ├── UI/          # MonoBehaviour, rendering and input handling only
+
 │       │   └── Network/     # WebSocket client (Phase 3)
+
 │       ├── Scenes/
+
 │       ├── Prefabs/
+
 │       └── Art/
+
 │           └── UI/          # UXML + USS files
+
 ├── server/                  # Node.js TypeScript
+
 │   ├── src/
-│   │   ├── games/           # TicTacToe, Caro, BattleShip logic
-│   │   └── core/            # WebSocket handler, room manager
+
+│   │   ├── games/           # TicTacToe game logic (extensible to Caro, BattleShip)
+
+│   │   └── core/            # WebSocket handlers, room management
+
 │   └── Dockerfile
+
 ├── .github/
-│   └── workflows/           # CI/CD pipeline
-├── PLAN.md
-└── PROGRESS.md
-```
+
+│   └── workflows/           # CI/CD pipelines
+
+├── [PLAN.md](http://PLAN.md)
+
+└── [PROGRESS.md](http://PROGRESS.md)
 
 ## Architecture Principles
-- **Server = source of truth** — client không tự quyết game state
-- **Game Logic độc lập với Unity** — pure C#, dễ port lên server
-- **Client chỉ lo render + gửi/nhận event**
-- **Mỗi phase commit rõ ràng, PR có description**
+
+- **Server as the Source of Truth** — Client does not determine or mutate the game state locally.
+
+- **Engine-Agnostic Game Logic** — Pure C# for core logic, allowing easy porting or reuse.
+
+- **Thin Client** — Client focuses solely on rendering, UI animation, and event transmission.
+
+- **Atomic Commits & Descriptive PRs** — Every phase requires clean commits and structured PR descriptions.
 
 ---
 
 ## Phase 1 — Local TicTacToe (Unity only)
-> Mục tiêu: quen Unity, code game logic clean, tách biệt rõ ràng
 
-- [ ] 1.1 Setup Unity project + folder structure
-- [ ] 1.2 Board 3x3 với UI Toolkit (UXML + USS)
-- [ ] 1.3 Game Logic: `GameState`, `GameLogic` (pure C#)
-- [ ] 1.4 `GameUI` MonoBehaviour — kết nối Logic và UI
-- [ ] 1.5 Polish: highlight ô thắng, restart button, UX cơ bản
+> Objective: Familiarize with Unity 6 features, implement clean logic separation.
+
+- [x] 1.1 Setup Unity project + folder structure
+
+- [x] 1.2 3x3 Board layout with UI Toolkit (UXML + USS)
+
+- [x] 1.3 Game Logic: `GameState`, `GameLogic` (pure C#)
+
+- [x] 1.4 `GameUI` MonoBehaviour — bind Logic to UI
+
+- [x] 1.5 Polish: Winning cells highlight, restart flow, basic UX refinement
 
 ---
 
-## Phase 2 — Setup Server + CI/CD
-> Mục tiêu: quen Node.js, GitHub Actions, Render deploy
+## Phase 2 — Server Setup + CI/CD
 
-- [ ] 2.1 Init Node.js + TypeScript project
-- [ ] 2.2 WebSocket server cơ bản (`ws` library)
-- [ ] 2.3 Setup GitHub repo + branching strategy
-- [ ] 2.4 Viết GitHub Actions workflow (lint → build → deploy)
-- [ ] 2.5 Connect Render với GitHub repo
-- [ ] 2.6 Deploy lần đầu, verify CI/CD chạy đúng
+> Objective: Initialize Node.js backend, configure automated pipelines, and deploy to production.
+
+- [x] 2.1 Initialize Node.js + TypeScript project
+
+- [x] 2.2 Basic WebSocket server using `ws` library
+
+- [x] 2.3 Setup GitHub repository + branching strategy
+
+- [x] 2.4 Configure GitHub Actions workflow (lint → typecheck → build → deploy)
+
+- [x] 2.5 Hook Render deployment with GitHub repository secrets
+
+- [x] 2.6 Execute initial deployment and verify production log correctness
 
 ---
 
 ## Phase 3 — Multiplayer TicTacToe
-> Mục tiêu: connect Unity client lên server thật
 
-- [ ] 3.1 Thiết kế message protocol (JSON schema)
-  - `join_room`, `make_move`, `game_state`, `game_over`
-- [ ] 3.2 Server: room manager, game session
-- [ ] 3.3 Unity: WebSocket client, connect/disconnect handling
-- [ ] 3.4 Sync game state — server là source of truth
-- [ ] 3.5 Handle edge cases: player disconnect, reconnect
+> Objective: Connect Unity client to the production server via WebSockets.
+
+- [ ] 3.1 Design communication protocol (JSON schema)
+
+  - Messages: `join_room`, `make_move`, `game_state`, `game_over`
+
+- [ ] 3.2 Server implementation: room manager, game session lifecycle
+
+- [ ] 3.3 Unity implementation: WebSocket network client, connection handling
+
+- [ ] 3.4 State synchronization — enforce server as source of truth
+
+- [ ] 3.5 Edge case handling: connection drops, graceful degradation, and reconnects
 
 ---
 
 ## Phase 4 — Polish + Scale
-> Mục tiêu: chuẩn bị mở rộng lên Caro / BattleShip
 
-- [ ] 4.1 Lobby UI: tạo phòng, join phòng bằng code
-- [ ] 4.2 Basic matchmaking (2 người vào → tự ghép)
-- [ ] 4.3 Refactor server: tách game logic riêng (dễ thêm game mới)
-- [ ] 4.4 Viết README + document protocol
+> Objective: Abstract interfaces to prepare for project scaling (Caro / BattleShip).
+
+- [ ] 4.1 Lobby UI: Room creation and joining via room codes
+
+- [ ] 4.2 Basic matchmaking queue (2 active players automatically match)
+
+- [ ] 4.3 Server-side refactoring: Decouple room core from game-specific components
+
+- [ ] 4.4 Documentation: Technical README + explicit message protocol reference
 
 ---
 
 ## Timeline
-| Phase | Thời gian ước tính | Milestone |
+
+| Phase | Estimated Duration | Milestone |
+
 |---|---|---|
-| Phase 1 | 1–2 tuần | Chơi được local 2 players |
-| Phase 2 | 3–5 ngày | Push code → tự deploy lên Render |
-| Phase 3 | 1–2 tuần | 2 người chơi online được |
-| Phase 4 | 1 tuần | Có lobby, code sạch, sẵn sàng scale |
+
+| Phase 1 | 1–2 Weeks | Fully playable local 2-player mode |
+
+| Phase 2 | 3–5 Days | Automated CD trigger to Render on main push |
+
+| Phase 3 | 1–2 Weeks | Stable online multiplayer gameplay loop |
+
+| Phase 4 | 1 Week | Scalable codebase with matchmaking capability |
 
 ---
 
-## Roadmap tương lai
-- **Caro (Gomoku)**: board size thay đổi, win condition algorithm, có thể thêm Redis
-- **BattleShip**: turn-based + hidden state (fog of war), học thêm security/cheat prevention
+## Future Roadmap
+
+- **Caro (Gomoku)**: Dynamic board sizes, continuous win-condition algorithms, potential Redis integration for sessions.
+
+- **BattleShip**: Asymmetric turn-based state (fog of war), security analysis, and server-side cheat prevention.
