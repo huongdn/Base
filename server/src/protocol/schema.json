@@ -1,0 +1,207 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://baseonline.local/protocol/tictactoe",
+  "title": "TicTacToe WebSocket Protocol",
+  "definitions": {
+    "playerSymbol": {
+      "type": "string",
+      "enum": ["X", "O", "None"]
+    },
+    "activePlayer": {
+      "type": "string",
+      "enum": ["X", "O"]
+    },
+    "roomStatus": {
+      "type": "string",
+      "enum": ["waiting", "playing", "finished"]
+    },
+    "board": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": { "$ref": "#/definitions/playerSymbol" }
+    },
+    "errorCode": {
+      "type": "string",
+      "enum": [
+        "INVALID_MESSAGE",
+        "INVALID_PAYLOAD",
+        "ROOM_NOT_FOUND",
+        "ROOM_FULL",
+        "NOT_IN_ROOM",
+        "NOT_YOUR_TURN",
+        "INVALID_MOVE",
+        "GAME_OVER",
+        "SESSION_INVALID"
+      ]
+    },
+    "clientJoinRoom": {
+      "type": "object",
+      "required": ["type", "payload"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "join_room" },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "roomId": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    },
+    "clientMakeMove": {
+      "type": "object",
+      "required": ["type", "payload"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "make_move" },
+        "payload": {
+          "type": "object",
+          "required": ["cellIndex"],
+          "additionalProperties": false,
+          "properties": {
+            "cellIndex": { "type": "integer", "minimum": 0, "maximum": 8 }
+          }
+        }
+      }
+    },
+    "clientRejoinRoom": {
+      "type": "object",
+      "required": ["type", "payload"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "rejoin_room" },
+        "payload": {
+          "type": "object",
+          "required": ["roomId", "sessionToken"],
+          "additionalProperties": false,
+          "properties": {
+            "roomId": { "type": "string", "minLength": 1 },
+            "sessionToken": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    },
+    "serverRoomJoined": {
+      "type": "object",
+      "required": ["type", "payload"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "room_joined" },
+        "payload": {
+          "type": "object",
+          "required": ["roomId", "yourPlayer", "sessionToken", "playerCount"],
+          "additionalProperties": false,
+          "properties": {
+            "roomId": { "type": "string" },
+            "yourPlayer": { "$ref": "#/definitions/activePlayer" },
+            "sessionToken": { "type": "string" },
+            "playerCount": { "type": "integer", "minimum": 1, "maximum": 2 }
+          }
+        }
+      }
+    },
+    "serverGameState": {
+      "type": "object",
+      "required": ["type", "payload"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "game_state" },
+        "payload": {
+          "type": "object",
+          "required": [
+            "roomId",
+            "status",
+            "board",
+            "currentPlayer",
+            "yourPlayer",
+            "winner",
+            "winningCells",
+            "isDraw"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "roomId": { "type": "string" },
+            "status": { "$ref": "#/definitions/roomStatus" },
+            "board": { "$ref": "#/definitions/board" },
+            "currentPlayer": { "$ref": "#/definitions/activePlayer" },
+            "yourPlayer": { "$ref": "#/definitions/activePlayer" },
+            "winner": { "$ref": "#/definitions/playerSymbol" },
+            "winningCells": {
+              "type": "array",
+              "items": { "type": "integer", "minimum": 0, "maximum": 8 }
+            },
+            "isDraw": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "serverGameOver": {
+      "type": "object",
+      "required": ["type", "payload"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "game_over" },
+        "payload": {
+          "type": "object",
+          "required": ["roomId", "winner", "winningCells", "isDraw"],
+          "additionalProperties": false,
+          "properties": {
+            "roomId": { "type": "string" },
+            "winner": { "$ref": "#/definitions/playerSymbol" },
+            "winningCells": {
+              "type": "array",
+              "items": { "type": "integer", "minimum": 0, "maximum": 8 }
+            },
+            "isDraw": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "serverPlayerLeft": {
+      "type": "object",
+      "required": ["type", "payload"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "player_left" },
+        "payload": {
+          "type": "object",
+          "required": ["roomId", "leftPlayer"],
+          "additionalProperties": false,
+          "properties": {
+            "roomId": { "type": "string" },
+            "leftPlayer": { "$ref": "#/definitions/activePlayer" }
+          }
+        }
+      }
+    },
+    "serverError": {
+      "type": "object",
+      "required": ["type", "payload"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "error" },
+        "payload": {
+          "type": "object",
+          "required": ["code", "message"],
+          "additionalProperties": false,
+          "properties": {
+            "code": { "$ref": "#/definitions/errorCode" },
+            "message": { "type": "string" }
+          }
+        }
+      }
+    }
+  },
+  "oneOf": [
+    { "$ref": "#/definitions/clientJoinRoom" },
+    { "$ref": "#/definitions/clientMakeMove" },
+    { "$ref": "#/definitions/clientRejoinRoom" },
+    { "$ref": "#/definitions/serverRoomJoined" },
+    { "$ref": "#/definitions/serverGameState" },
+    { "$ref": "#/definitions/serverGameOver" },
+    { "$ref": "#/definitions/serverPlayerLeft" },
+    { "$ref": "#/definitions/serverError" }
+  ]
+}
